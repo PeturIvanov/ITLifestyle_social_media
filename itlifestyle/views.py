@@ -15,7 +15,35 @@ def profile_list(request):
         return render(request, 'profile_list.html', {'profiles': profiles})
 
     else:
-        messages.success(request, "You Must Be Logged In To View This Page!")
+        messages.success(request, 'You Must Be Logged In To View This Page!')
         return redirect('home')
 
 
+# Create User's Profile View
+def profile(request, pk):
+    if request.user.is_authenticated:
+        user_profile = Profile.objects.get(user_id=pk)
+
+        # Post Form logic
+        if request.method == 'POST':
+            # Get current user
+            current_user_profile = request.user.profile
+
+            # Get form data
+            action = request.POST['follow']
+
+            # Follow or Unfollow
+            if action == 'unfollow':
+                current_user_profile.follows.remove(user_profile)
+
+            elif action == 'follow':
+                current_user_profile.follows.add(user_profile)
+
+            # Save the profile
+            current_user_profile.save()
+
+        return render(request, 'profile.html', {'user_profile': user_profile})
+
+    else:
+        messages.success(request, 'You Must Be Logged In To View This Page!')
+        return redirect('home')
